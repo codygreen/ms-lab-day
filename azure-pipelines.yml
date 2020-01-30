@@ -1,0 +1,37 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - master
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - script: ls /home/vsts/work/1/s/
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: "$(build.sourcesDirectory)/terraform"
+      Contents: "**"
+      TargetFolder: "$(build.artifactstagingdirectory)/terraform"
+
+  - task: TerraformInstaller@0
+  inputs:
+    terraformVersion: '0.12.20'
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'f5-AZR_4261_SALES_ENT_SA(aacd7ba7-e47c-4cb7-a8b7-90f81fdd3865)'
+    backendAzureRmResourceGroupName: 'mjmengertstate'
+    backendAzureRmStorageAccountName: 'tstate5253'
+    backendAzureRmContainerName: 'tstate'
+    backendAzureRmKey: 'terraform.tfstate'
+- task: TerraformTaskV1@0
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    commandOptions: '-auto-approve -var "url=$(url)" -var "password=$(password)"'
+    environmentServiceNameAzureRM: 'f5-AZR_4261_SALES_ENT_SA(aacd7ba7-e47c-4cb7-a8b7-90f81fdd3865)'
